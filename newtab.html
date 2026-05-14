@@ -3,556 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>GlassHub</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            /* Variables pour l'effet verre dépoli (Glassmorphism) */
-            --glass-bg: rgba(15, 20, 40, 0.15);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --glass-blur: blur(12px);
-            --text-main: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.8);
-        }
+    <link rel="stylesheet" href="style.css">
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            color: var(--text-main);
-            
-            /* L'IMAGE DE FOND EST INTÉGRÉE ICI */
-            background: url('default_background_REPLACE_ME.jpg') no-repeat center center fixed; 
-            background-size: cover;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: 100%;
-            padding-left: 8%;
-            max-width: 1200px;
-        }
-
-        /* --- Horloge & Salutations --- */
-        .header {
-            margin-bottom: 40px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        .time {
-            font-size: 5.5rem;
-            font-weight: 500;
-            line-height: 1.1;
-            letter-spacing: -2px;
-        }
-
-        .greeting {
-            font-size: 1.5rem;
-            font-weight: 500;
-            margin-top: 5px;
-        }
-
-        .date {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            margin-top: 5px;
-        }
-
-        .weather-display {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: var(--text-main);
-            display: none; /* Masqué par défaut */
-            align-items: center;
-            justify-content: flex-end;
-            gap: 8px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            padding: 10px 20px;
-            border-radius: 20px;
-            z-index: 50;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        /* --- Barre de recherche --- */
-        .search-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 960px;
-            margin-bottom: 30px;
-            z-index: 10;
-        }
-
-        .search-container {
-            display: flex;
-            align-items: center;
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 50px;
-            padding: 15px 25px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-            width: 100%;
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 2;
-        }
-
-        .search-container:focus-within {
-            background: rgba(25, 30, 50, 0.35);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-        }
-
-        .search-container input {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            font-size: 1.1rem;
-            outline: none;
-            flex-grow: 1;
-            margin: 0 15px;
-        }
-
-        .search-container input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .search-icon {
-            opacity: 0.7;
-            font-size: 1.2rem;
-            cursor: pointer;
-            background: none;
-            border: none;
-            color: inherit;
-            text-decoration: none;
-            transition: opacity 0.2s;
-        }
-        
-        .search-icon:hover {
-            opacity: 1;
-        }
-
-        /* --- Suggestions (Autocomplete) --- */
-        .suggestions-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background: rgba(15, 20, 40, 0.85);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            border-top: none;
-            border-radius: 0 0 25px 25px;
-            overflow: hidden;
-            display: none;
-            flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            margin-top: -25px; /* Chevauchement pour la fusion */
-            padding-top: 25px; /* Espace pour le chevauchement */
-            z-index: 1;
-        }
-
-        .search-wrapper.active .search-container {
-            border-radius: 25px 25px 0 0;
-            background: rgba(25, 30, 50, 0.85);
-        }
-
-        .search-wrapper.active .suggestions-dropdown {
-            display: flex;
-        }
-
-        .suggestion-item {
-            padding: 12px 25px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-            color: var(--text-main);
-            transition: background 0.2s;
-            font-size: 0.95rem; /* Police plus petite */
-        }
-
-        .suggestion-item:hover, .suggestion-item.selected {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .suggestion-icon {
-            opacity: 0.6;
-            font-size: 1.1rem;
-        }
-        
-        .suggestion-text {
-            flex-grow: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .suggestion-url {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 40%;
-            text-align: right;
-        }
-
-        /* --- Grands Raccourcis --- */
-        .shortcuts-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-            max-width: 600px;
-        }
-
-        .shortcut-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 12px 20px;
-            text-decoration: none;
-            color: var(--text-main);
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: background 0.2s, transform 0.1s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-
-        .shortcut-btn:hover {
-            background: rgba(25, 35, 65, 0.35);
-            transform: translateY(-2px);
-        }
-
-        .shortcut-icon {
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .shortcut-icon img {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            border-radius: 4px;
-        }
-
-        /* --- Petits Raccourcis --- */
-        .small-shortcuts {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            max-width: 600px;
-        }
-
-        .small-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 45px;
-            height: 45px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            text-decoration: none;
-            color: var(--text-main);
-            font-size: 1.2rem;
-            transition: background 0.2s, transform 0.1s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .small-btn:hover {
-            background: rgba(25, 35, 65, 0.35);
-            transform: translateY(-2px);
-        }
-
-        .small-btn img {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
-            border-radius: 4px;
-        }
-
-        /* --- Settings Button and Modal --- */
-        .settings-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .settings-btn:hover {
-            background: rgba(25, 35, 65, 0.8);
-            transform: rotate(45deg);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal-content {
-            background: rgba(15, 20, 40, 0.85);
-            backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 30px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 85vh;
-            overflow-y: auto;
-            color: var(--text-main);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-        }
-
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--glass-border);
-            padding-bottom: 15px;
-        }
-
-        .modal-header h2 {
-            font-weight: 500;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-main);
-            font-size: 2rem;
-            cursor: pointer;
-            line-height: 1;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-
-        .modal-close:hover {
-            opacity: 1;
-        }
-        
-        .modal-section {
-            margin-bottom: 25px;
-        }
-
-        .modal-section h3 {
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            font-weight: 400;
-        }
-
-        .link-edit-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-            align-items: center;
-        }
-
-        .link-edit-row input {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            color: white;
-            padding: 10px 12px;
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .link-edit-row input:focus {
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .link-edit-row input.icon-input {
-            width: 55px;
-            text-align: center;
-        }
-
-        .link-edit-row input.name-input {
-            flex: 1;
-        }
-
-        .link-edit-row input.url-input {
-            flex: 2;
-        }
-
-        .fetch-favicon-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            border-radius: 8px;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .fetch-favicon-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .greeting-input {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            color: white;
-            padding: 10px 12px;
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .greeting-input:focus {
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .delete-btn {
-            background: rgba(255, 50, 50, 0.2);
-            border: 1px solid rgba(255, 50, 50, 0.4);
-            color: white;
-            border-radius: 8px;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .delete-btn:hover {
-            background: rgba(255, 50, 50, 0.5);
-        }
-
-        .add-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--glass-border);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 5px;
-            transition: all 0.2s;
-        }
-        .add-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .drag-handle {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            cursor: grab;
-            transition: color 0.2s;
-            padding: 0 8px 0 0;
-            display: flex;
-            align-items: center;
-        }
-
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-        
-        .link-edit-row.dragging {
-            opacity: 0.5;
-        }
-        
-        .link-edit-row.drag-over {
-            border-top: 2px dashed rgba(255, 255, 255, 0.8);
-        }
-
-        .save-btn {
-            background: rgba(60, 120, 255, 0.6);
-            border: 1px solid rgba(100, 150, 255, 0.4);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            width: 100%;
-            margin-top: 10px;
-            transition: background 0.2s;
-        }
-
-        .save-btn:hover {
-            background: rgba(60, 120, 255, 0.8);
-        }
-    </style>
+    <script src="newtab.js" defer></script>
 </head>
 <body>
 
@@ -570,32 +29,27 @@
                 <input type="text" id="searchInput" placeholder="Search Google or type a URL" autofocus autocomplete="off">
             </form>
             <div class="suggestions-dropdown" id="suggestionsBox">
-                <!-- Suggestions injectées dynamiquement -->
+                <!-- Suggestions injected dynamically -->
             </div>
         </div>
 
         <div class="shortcuts-grid" id="shortcutsGrid">
-            <!-- Rempli dynamiquement en JS -->
+            <!-- Dynamically populated via JS -->
         </div>
 
         <div class="small-shortcuts" id="smallShortcuts">
-            <!-- Rempli dynamiquement en JS -->
+            <!-- Dynamically populated via JS -->
         </div>
 
     </div>
 
-    <!-- Météo en haut à droite -->
+    <!-- Weather Wallpaper in the top right -->
     <div class="weather-display" id="weatherDisplay"></div>
 
-    <!-- Bouton de paramètres -->
-    <button class="settings-btn" id="settingsBtn" title="Customize Links">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-    </button>
+    <!-- The Settings button -->
+    <button class="settings-btn" id="settingsBtn" title="Customize Links">⚙️</button>
 
-    <!-- Modale de paramètres -->
+    <!-- The Settings Model Section -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -613,15 +67,18 @@
                 <div class="link-edit-row" style="margin-top: 10px;">
                     <input type="text" id="bgUrlInput" class="greeting-input" placeholder="Or paste an image URL (GIFs work too!)">
                 </div>
-            </div>
-
-            <div class="modal-section">
-                <h3>Clock Settings</h3>
-                <div class="link-edit-row" style="flex-direction: column; align-items: flex-start; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
+                <div class="link-edit-row" style="margin-top: 15px; flex-direction: column; align-items: flex-start; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
                     <label style="display:flex; align-items:center; gap: 10px; cursor: pointer; font-size: 0.95rem;">
-                        <input type="checkbox" id="clockFormatCheckbox" style="width: 18px; height: 18px;"> 
-                        Use 12-hour format (AM/PM)
+                        <input type="checkbox" id="slideshowCheckbox" style="width: 18px; height: 18px;"> 
+                        Auto Slideshow (every hour from "backgrounds" folder)
                     </label>
+                    <div id="slideshowSettings" style="display:none; margin-top: 10px; width: 100%;">
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+                            Due to browser security, you must name your images as numbers: <b>1.jpg, 2.jpg, 3.jpg</b>...<br>
+                            How many images did you put in the folder?
+                        </p>
+                        <input type="number" id="slideshowCountInput" class="greeting-input" min="1" value="1" style="max-width: 100px;">
+                    </div>
                 </div>
             </div>
 
@@ -641,13 +98,11 @@
             <div class="modal-section">
                 <h3>Main Shortcuts</h3>
                 <div id="mainShortcutsEdit"></div>
-                <button class="add-btn" id="addMainShortcutBtn" style="margin-top: 10px;">+ Add Shortcut</button>
             </div>
 
             <div class="modal-section">
                 <h3>Small Shortcuts</h3>
                 <div id="smallShortcutsEdit"></div>
-                <button class="add-btn" id="addSmallShortcutBtn" style="margin-top: 10px;">+ Add Shortcut</button>
             </div>
 
             <div class="modal-section">
@@ -666,6 +121,5 @@
         </div>
     </div>
 
-    <script src="newtab.js"></script>
 </body>
 </html>
